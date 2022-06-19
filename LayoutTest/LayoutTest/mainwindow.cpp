@@ -5,6 +5,8 @@
 #include <QGridLayout>
 #include <QDebug>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QMessageBox>
 
 #define out qDebug()
 
@@ -47,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->password->setEchoMode(QLineEdit::Password);
     ui->passwdCheck->setCheckState(Qt::Unchecked);
     connect(ui->passwdCheck, &QCheckBox::stateChanged, this, &MainWindow::ChangePasswdStatus);
-
+    connect(ui->logIn, &QPushButton::clicked, this, &MainWindow::Login);
 }
 
 MainWindow::~MainWindow()
@@ -63,6 +65,20 @@ void MainWindow::ChangePasswdStatus(int state)
         ui->password->setEchoMode(QLineEdit::Password);
     } else {
         ui->password->setEchoMode(QLineEdit::Normal);
+    }
+}
+
+void MainWindow::Login()
+{
+    QString account = ui->account->text();
+    QString passwd = ui->password->text();
+
+    // 认证过程
+    if (account == "shm" && passwd == "123456") {
+        out << "登陆成功";
+        QMessageBox::information(this, "登陆成功", "欢迎使用", QMessageBox::Open | QMessageBox::Yes, QMessageBox::Yes);
+    } else {
+        QMessageBox::warning(this, "账号密码不匹配", "兄弟，开guest吧");
     }
 }
 

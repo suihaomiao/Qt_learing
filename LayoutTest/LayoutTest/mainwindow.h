@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QString>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +18,7 @@ public:
 
 private:
     void ChangePasswdStatus(int state);
+    void Login();
 
 private:
     Ui::MainWindow *ui;
