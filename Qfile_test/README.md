@@ -241,35 +241,5 @@ filter：过滤的文件，只有符合该参数的文件类型才会被显示�
 
 返回值为用户选择的文件的路径，若没有选择，则为null。
 
-### 5、文件操作
-Qt中的文件操作有三种：
-QFile、QDir和QFileInfo
-QFile，进行文件读和写：
-``` c++
-void MainWindow::OpenFile()
-{
-    filePath = QFileDialog::getOpenFileName(this, tr("选择打开的文件"), ".", "text(*.txt) markdown(*.md)");
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::warning(this, "警告","打开文件失败");
-        return;
-    }
-    QByteArray data = file.readAll();
-    ui->textEdit->setText(data);
-    ui->textBrowser->setText(data);
-    file.close();
-}
 
-void MainWindow::SaveFile()
-{
-    QString data = ui->textEdit->toPlainText();
-    QFile file(filePath);
-    if (file.open(QIODevice::ReadWrite | QIODevice::Truncate)) {
-        QMessageBox::warning(this, "警告","打开文件失败");
-        return;
-    }
-    file.write(data.toUtf8());
-    file.close();
-}
-```
 
