@@ -273,3 +273,180 @@ void MainWindow::SaveFile()
 }
 ```
 
+
+
+
+
+
+
+### 数据库操作
+
+本次学习的数据库操作是基于sqlite3学习；
+
+#### 1）学习数据库编译
+
+从官网中下载到源代码，源代码非常简单，只有几个文件，可以用gcc直接编译；
+
+![](pic\sqlite3-1.jpg)
+
+其中，shell.c是我们的执行终端，后面的是核心c文件，其中sqlite3.c有8m左右大小；
+
+在cmd或者shell上执行
+
+```shell
+gcc -o sqlite3 shell.c sqlite3.c -lpthread
+```
+
+可以编译出sqlite3的可执行文件，这个就是数据库的可执行文件
+
+
+
+#### 2）学习数据库的简单知识
+
+数据库中存储数据是以表格的形式存储的，例如：
+
+| 编号 | 姓名 | 性别 | 年龄 | 地址       | 电话  |
+| ---- | ---- | ---- | ---- | ---------- | ----- |
+| 1    | 张三 | 男   | 30   | 四川省成都 | 10000 |
+|      |      |      |      |            |       |
+|      |      |      |      |            |       |
+
+编号，姓名，性别，年龄，电话，这些都称为表格的字段
+
+###### 字段的数据类型
+
+| 类型    | 范围            | 说明                  |
+| ------- | --------------- | --------------------- |
+| int     | -2^32 ~ 2^32 -1 | 整型                  |
+| float   |                 | 浮点                  |
+| real    |                 | 浮点                  |
+| char    | 8000            | 定长的unicode字符类型 |
+| varchar | 8000            | 变长的unicode字符类型 |
+| test    | 2G·             | 变长unicode文本类型   |
+
+
+
+#### 3）SQL语句
+
+SQL语句一般有（语句一般不区分大小写）
+
+创建表格
+
+```sqlite
+create table 表明 (字段名 字段数据类型， 字段名 字段数据类型, ...) # 例如：
+create table person (number int, name char[32], sex varchar[8], address text, phone char[11]);
+```
+
+插入数据
+
+```sqlite
+insert into 表名 values(值1， 值2); # 规定字段类型char, varchar, text类型，值需要用双引号或单引号
+insert into 表名(字段1， 字段2) values（值1， 值2）;# 第二个插入方式可以选择某几个数据写入，其他字段不写入
+
+# 例如：
+insert into person values(1, "张三", "男", "四川省成都市", "1000000000");
+insert into person(number, name, sex) values(2, "李四", "不男不女");
+
+```
+
+效果如下：
+
+![image-20220703152803654](pic\sqlite3-2.jpg)
+
+查询数据
+
+```sql
+select [字段1，字段2， ...] from 表名 # 查询所有的字段的话，可以用*代替
+# 条件查询
+select * from 表名 where 条件;
+# 条件可以有很多：
+# number==1, number>1, 等等
+# number<10 and name=="张三"
+# sex=="男" or number < 2
+```
+
+![image-20220703153156635](pic\sqlite3-3.jpg)
+
+更新数据
+
+```sql
+update 表名 set 字段名=数值名 where 条件 # 更新数据
+
+```
+
+![image-20220703155142099](pic\sqlite3-4.jpg)
+
+删除数据
+
+```sql
+delete from 表名 where 条件; # 删除表格的数据，表格本身还在;
+```
+
+删除表格
+
+```sql
+drop table 表名 # 删除整个表格
+```
+
+修改表格
+
+```sql
+alter table 表名 add column 字段名称 字段类型 # 为表名添加一个字段
+
+```
+
+其他命令：
+
+```sql
+.table # 查看该数据库的所有表格
+pragma table_info(表名) #查询表的结构信息
+```
+
+
+
+#### 4） SQL的事务机制
+
+把更新数据，插入数据，删除数据等操作，可以创建一个事务，在这个事务中处理无误后，一次性提交到数据库。
+
+实际上，提交到数据库就是在写文件，写文件是比较慢的，事务相当于就是先写入到内存，然后再写入到文件；
+
+在没有提交得到情况下，可以回滚。
+
+```sql
+begin # 开启事务
+commit # 提交事务
+rollback # 回滚
+```
+
+![image-20220703161427717](pic\sqlite3-5.jpg)
+
+#### 5）数据库约束
+
+主键(primary key)：即在该表格内，这个字段的值不和其他数据重复，即是唯一的；
+
+int类型的主键，可以设置为autoincrement 
+
+NOT NULL  值不能为空
+
+unique值唯一
+
+default 设置字段默认值
+
+if not exists ：判断表格是否存在，如果不存在，则创建表格
+
+```sql
+create table student(id integer primary key autoincrement, # 主键，自动增长
+					name varchar[32], NOT NULL, # 姓名，不能为空
+					sex varchar[8],
+					phone text UNIQUE, # 电话必须设置为唯一的
+					regtime TimeStamp NOT NULL default (datatime('now', 'local'))
+                    # 时间不能为空，默认用当前时间来插入
+					);
+insert into student(name, sex, phone) values('edword', 'man', '10010');		
+select * from student;
+```
+
+![image-20220703163037676](pic\sqlite3-6.jpg)
+
+第一个数值会自动增长，最后时间会自动生成并插入
+
