@@ -351,7 +351,7 @@ insert into person(number, name, sex) values(2, "李四", "不男不女");
 
 效果如下：
 
-![image-20220703152803654](pic\sqlite3-2.jpg)
+![image-20220703152803654](pic\sqlite3-2.png)
 
 查询数据
 
@@ -365,7 +365,7 @@ select * from 表名 where 条件;
 # sex=="男" or number < 2
 ```
 
-![image-20220703153156635](pic\sqlite3-3.jpg)
+![image-20220703153156635](pic\sqlite3-3.png)
 
 更新数据
 
@@ -374,7 +374,7 @@ update 表名 set 字段名=数值名 where 条件 # 更新数据
 
 ```
 
-![image-20220703155142099](pic\sqlite3-4.jpg)
+![image-20220703155142099](pic\sqlite3-4.png)
 
 删除数据
 
@@ -418,7 +418,7 @@ commit # 提交事务
 rollback # 回滚
 ```
 
-![image-20220703161427717](pic\sqlite3-5.jpg)
+![image-20220703161427717](pic\sqlite3-5.png)
 
 #### 5）数据库约束
 
@@ -446,7 +446,61 @@ insert into student(name, sex, phone) values('edword', 'man', '10010');
 select * from student;
 ```
 
-![image-20220703163037676](pic\sqlite3-6.jpg)
+![image-20220703163037676](pic\sqlite3-6.png)
 
 第一个数值会自动增长，最后时间会自动生成并插入
+
+
+
+#### 6）用api操作数据库
+
+首先需要把数据库的源代码拷贝到项目中来:sqlite3.c sqlite3.h
+
+然后就可以使用sqlite3提供的接口：
+
+```c
+int sqlite3_open(         // 打开数据库接口
+  const char *filename,   /* Database filename (UTF-8) */
+  sqlite3 **ppDb          /* OUT: SQLite db handle */
+);
+
+int sqlite3_close(sqlite3*); // 关闭数据库
+
+int sqlite3_exec(		// 执行sql语句
+  sqlite3*,                                  /* An open database */
+  const char *sql,                           /* SQL to be evaluated */
+  int (*callback)(void*,int,char**,char**),  /* Callback function */
+  void *,                                    /* 1st argument to callback */
+  char **errmsg                              /* Error msg written here */
+);
+// 针对exec执行语句，注意以下几点：
+// 1.callback回调函数，可以通过该函数获取查询数据库的值；
+// 第一个cahr**是拿到的数据库的值，值通过数组的方式存在一个二维指针内；
+// 第二个char**是列的名称；
+// 2.void*是回调函数的第一个参数，可以通过该参数将内容带出去
+// 3. errmsg 保存错误信息，需要通过sqlite3_free释放内存
+// 4. int (*callback)(void* arg, int col, char** values, char**names), 参数解析如下：
+// void* arg - sqlite3_exec的第四个参数
+// int col - 查询到的数据的列
+// char** values -- 一行数据的所有值
+// char** names -- 一列数据对应的字段名
+// 返回值 -- 如果需要全部查询就返回0， 如果需要终止返回非0
+
+int sqlite3_get_table(
+  sqlite3 *db,          /* An open database */
+  const char *zSql,     /* SQL to be evaluated */
+  char ***pazResult,    /* Results of the query */
+  int *pnRow,           /* Number of result rows written here */
+  int *pnColumn,        /* Number of result columns written here */
+  char **pzErrmsg       /* Error msg written here */
+);
+
+
+```
+
+
+
+#### 7） QT的数据操作
+
+QSqlDatabase（数据库操作）、QSqlDriver（数据库驱动）、QSqlError（错误信息）、QSqlQuery（执行SQL语句）、QSqlRecord（数据记录）、QSqlTableModel（数据库表格模型）
 
