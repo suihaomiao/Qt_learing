@@ -279,7 +279,7 @@ void MainWindow::SaveFile()
 
 
 
-### 数据库操作
+### 6、数据库操作
 
 本次学习的数据库操作是基于sqlite3学习；
 
@@ -503,4 +503,64 @@ int sqlite3_get_table(
 #### 7） QT的数据操作
 
 QSqlDatabase（数据库操作）、QSqlDriver（数据库驱动）、QSqlError（错误信息）、QSqlQuery（执行SQL语句）、QSqlRecord（数据记录）、QSqlTableModel（数据库表格模型）
+
+Qt数据库使用流程：
+
+1、创建数据库对象并且绑定对应的底层数据库（sqlite3, mysql, sqlserver）
+
+```C++
+ 	// database指定数据库
+    QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
+
+    // 设置数据库信息（数据库名，用户名称，密码，主机）
+    // sqlite3 没有用户名和密码，mysql可以有
+    database.setDatabaseName("user.db");
+```
+
+2、打开数据库
+
+```C++
+// 打开数据库
+    if (!database.open()) {
+        // 打开失败
+        exit(1);
+    }
+```
+
+3、执行SQL语句
+
+```C++
+	// 操作数据库
+    QString create_sql = "create table user(id integer primary key autoincrement,"
+                         "username varchar(128) unique,"
+                         "password varchar(128))";
+    QSqlQuery query;
+    if (query.exec(create_sql)) {
+        // 执行错误
+    }
+```
+
+注：
+
+1）第一步打开底层数据库时，需要指定数据库类型，目前Qt在底层驱动支持的数据库覆盖市面上主流的数据库
+
+2）数据库需要设置数据库名（即数据库的文件名），用户名/密码和主机等；需要按照不同数据库类型来区分。
+
+3）执行SQL语句时，需要构造一个QSqlQuery对象，只要在这个工程中之前打开过数据库，该语句可直接执行到这个数据库：
+
+其原理为，在第一次打开数据库时，addDatabase需要指定一个数据库链接名称；
+
+```C++
+[static] QSqlDatabase QSqlDatabase::addDatabase(const QString &type, const QString &connectionName = QLatin1String(defaultConnection))
+```
+
+该函数功能为：以数据库类型和链接名在数据库链接表中添加一个数据库链接，当不执行数据库链接名时，函数会传入一个默认名称，成为默认链接。
+
+构造QSqlQuery时如果没有指定数据库名，则会使用默认的，这意味着，如果我们只使用一个数据库时，我们可以在功能的任意地方执行SQL语句。
+
+
+
+### 7、时间操作
+
+
 
